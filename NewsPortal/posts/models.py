@@ -1,0 +1,80 @@
+from django.db import models
+
+# Create your models here.
+class Author(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=0)
+
+    def update_rating(self):
+        """Обновляет рейтинг текущего автора"""
+        
+
+
+#  который  
+#   pass
+    # состоит из:
+    # суммарный рейтинг каждой статьи автора умножается на 3
+    # суммарный рейтинг всех комментариев автора
+    # суммарный рейтинг всех комментариев к статьям автора
+
+class Category(models.Model):
+    sport = 'Sport'
+    it_industry = 'IT'
+    games = 'Games'
+    russian_extreme = 'RusExt'
+    development = 'Dev'
+
+    CATEGORYES = [
+        (sport, 'Спорт'),
+        (it_industry, 'it-индустрия'),
+        (games, 'игры'),
+        (russian_extreme, 'Русский экстрим')
+        (development, 'Развитие')
+    ]
+    category_name = models.CharField(max_length=20,
+                                     choices=CATEGORYES,
+                                     unique= True)
+
+class Post(models.Model):
+    article = 'AR'
+    news = 'NW'
+
+    POST_TYPES = [
+        (article, 'Статья'),
+        (news, 'Новость')
+    ]
+
+    author = models.ForeignKey('Author', on_delete=models.CASCADE) # связь «один ко многим» с моделью Author
+    post_types = models.CharField(max_length=2, choices=POST_TYPES) # поле с выбором — «статья» или «новость»
+    created_at = models.DateTimeField(auto_now_add=True) # автоматически добавляемая дата и время создания
+    categories = models.ManyToManyField('Category', through='PostCategory') # связь «многие ко многим» с моделью Category (с дополнительной моделью PostCategory)
+    title = models.CharField(max_length=255) # заголовок статьи/новости
+    text = models.TextField() # текст статьи/новости
+    rating = models.IntegerField(default=0) # рейтинг статьи/новости.
+
+    def preview(self):
+        """Возвращает начало статьи (предварительный просмотр) 
+        длиной 124 символа и добавляет многоточие в конце"""
+        return self.text[:120] + '...'
+
+class PostCategory(models.Model):
+    """Таблица многих ко многим"""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE) # связь «один ко многим» с моделью Post
+    category = models.ForeignKey('Category', on_delete=models.CASCADE) # связь «один ко многим» с моделью Category
+
+class Comment(models.Model):
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments') # связь «один ко многим» с моделью Pos
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # связь «один ко многим» со встроенной моделью User
+    text = models.TextField() # текст комментария
+    created_at = models.DateTimeField(auto_now_add=True) # дата и время создания комментария
+    rating = models.IntegerField(default=0) # рейтинг комментария
+
+    def like(self):
+        """like() увеличивают рейтинг на единицу."""
+        self.rating += 1
+        self.save()
+
+    def dislike(self):
+        """dislike() уменьшают рейтинг на единицу."""
+        self.rating -= 1
+        self.save
