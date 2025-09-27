@@ -1,21 +1,24 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models import Sum
 
-# Create your models here.
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
 
     def update_rating(self):
         """Обновляет рейтинг текущего автора"""
+        # суммарный рейтинг каждой статьи автора умножается на 3
+        article_rating = self.post_set.aggregate(total=Sum('rating'))['total'] or 0
+        # суммарный рейтинг всех комментариев автора
+        comment_rating = self.user.comment_set.aggregate(total=Sum('rating'))['total']
+        # суммарный рейтинг всех комментариев к статьям автора
+        post_comment_rating = 0
+        for post in self.post_set.all():
+            post_comment_rating += post.comments.aggregate(total=Sum('rating'))['total'] or 0
         
-
-
-#  который  
-#   pass
-    # состоит из:
-    # суммарный рейтинг каждой статьи автора умножается на 3
-    # суммарный рейтинг всех комментариев автора
-    # суммарный рейтинг всех комментариев к статьям автора
+        self.rating = article_rating * 3 + comment_rating + post_comment_rating
+        self.save()
 
 class Category(models.Model):
     sport = 'Sport'
@@ -28,7 +31,7 @@ class Category(models.Model):
         (sport, 'Спорт'),
         (it_industry, 'it-индустрия'),
         (games, 'игры'),
-        (russian_extreme, 'Русский экстрим')
+        (russian_extreme, 'Русский экстрим'),
         (development, 'Развитие')
     ]
     category_name = models.CharField(max_length=20,
@@ -45,17 +48,27 @@ class Post(models.Model):
     ]
 
     author = models.ForeignKey('Author', on_delete=models.CASCADE) # связь «один ко многим» с моделью Author
-    post_types = models.CharField(max_length=2, choices=POST_TYPES) # поле с выбором — «статья» или «новость»
+    post_type = models.CharField(max_length=2, choices=POST_TYPES) # поле с выбором — «статья» или «новость»
     created_at = models.DateTimeField(auto_now_add=True) # автоматически добавляемая дата и время создания
     categories = models.ManyToManyField('Category', through='PostCategory') # связь «многие ко многим» с моделью Category (с дополнительной моделью PostCategory)
     title = models.CharField(max_length=255) # заголовок статьи/новости
     text = models.TextField() # текст статьи/новости
     rating = models.IntegerField(default=0) # рейтинг статьи/новости.
 
+    def like(self):
+        """like() увеличивают рейтинг на единицу."""
+        self.rating += 1
+        self.save()
+
+    def dislike(self):
+        """dislike() уменьшают рейтинг на единицу."""
+        self.rating -= 1
+        self.save()   
+
     def preview(self):
         """Возвращает начало статьи (предварительный просмотр) 
         длиной 124 символа и добавляет многоточие в конце"""
-        return self.text[:120] + '...'
+        return self.text[:124] + '...'
 
 class PostCategory(models.Model):
     """Таблица многих ко многим"""
@@ -77,4 +90,4 @@ class Comment(models.Model):
     def dislike(self):
         """dislike() уменьшают рейтинг на единицу."""
         self.rating -= 1
-        self.save
+        self.save()
