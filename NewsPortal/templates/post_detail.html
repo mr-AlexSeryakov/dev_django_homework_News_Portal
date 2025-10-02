@@ -9,12 +9,13 @@
 <!-- В контенте на странице мы выводим все товары -->
 {% block content %}
 <h1>{{ post.title }}</h1>
+<h3>Дата публикации: {{ post.created_at|date:'M d Y' }}</h3>
+<hr>
 <p>Автор: {{ post.author.user.username }}</p>
-<p>Опубликовано: {{ post.created_at }}</p>
-<p>Рейтинг: {{ post.rating }}</p>
-<div>
-    {{ post.preview }}
-</div>
 <p>{{ post.text}}</p>
-{{ products|linebreaks }}
 {% endblock content %}
+
+<!--
+По ссылке /news/<id новости> должна выводиться детальная информация о новости.
+Заголовок, дата публикации в формате день.месяц.год и полный текст статьи.
+-->
