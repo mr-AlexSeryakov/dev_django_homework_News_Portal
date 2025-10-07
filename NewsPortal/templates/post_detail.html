@@ -1,5 +1,8 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %} 
+
+<!-- подгружаем custom filter -->
+{% load custom_filters %}
  
 <!-- Название у нас будет products -->
 {% block title %}
@@ -8,14 +11,9 @@
  
 <!-- В контенте на странице мы выводим все товары -->
 {% block content %}
-<h1>{{ post.title }}</h1>
-<h3>Дата публикации: {{ post.created_at|date:'M d Y' }}</h3>
+<h1>{{ post.title|censor }}</h1>
+<h3>Дата публикации: {{ post.created_at|date:'d M Y' }}</h3>
 <hr>
 <p>Автор: {{ post.author.user.username }}</p>
-<p>{{ post.text}}</p>
+<p>{{ post.text|censor }}</p>
 {% endblock content %}
-
-<!--
-По ссылке /news/<id новости> должна выводиться детальная информация о новости.
-Заголовок, дата публикации в формате день.месяц.год и полный текст статьи.
--->
