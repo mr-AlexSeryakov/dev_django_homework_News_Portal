@@ -50,7 +50,7 @@ class Post(models.Model):
     author = models.ForeignKey('Author', on_delete=models.CASCADE) # связь «один ко многим» с моделью Author
     post_type = models.CharField(max_length=2, choices=POST_TYPES) # поле с выбором — «статья» или «новость»
     created_at = models.DateTimeField(auto_now_add=True) # автоматически добавляемая дата и время создания
-    categories = models.ManyToManyField('Category', through='PostCategory') # связь «многие ко многим» с моделью Category (с дополнительной моделью PostCategory)
+    categories = models.ManyToManyField('Category') # связь «многие ко многим» с моделью Category
     title = models.CharField(max_length=255) # заголовок статьи/новости
     text = models.TextField() # текст статьи/новости
     rating = models.IntegerField(default=0) # рейтинг статьи/новости.
