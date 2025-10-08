@@ -15,12 +15,15 @@
     venv\Scripts\activate # Windows
 
 2. Клонировать репозиторий:
+    ```bash
     git clone https://github.com/mr-AlexSeryakov/dev_django_homework_News_Portal.git
 
 3. Перейти в папку проекта:
+    ```bash
     cd News_Portal
 
 4. Установить расширения:
+    ```bash
     pip install -r reguirements.txt
 
 ## Функционал
