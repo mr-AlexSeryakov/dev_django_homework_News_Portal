@@ -7,6 +7,7 @@ class PostList(ListView):
     model = Post
     template_name = 'post_list.html'
     context_object_name = 'posts'
+    paginate_by = 3
 
 class PostDetail(DetailView):
     """Отдельная новость"""
