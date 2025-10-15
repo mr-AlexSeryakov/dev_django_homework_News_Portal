@@ -1,8 +1,14 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+
 from .models import Post
 
 from .filters import ProductFilter
+
+from .forms import ProductForm
+
+from django.http import HttpResponseRedirect
+# Create your views here.
 
 class PostList(ListView):
     """
@@ -74,3 +80,14 @@ class PostDetail(DetailView):
     model = Post
     template_name = 'post_detail.html'
     context_object_name = 'post'
+
+def create_product(request):
+    form = ProductForm()
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/news/')
+        
+    return render(request, 'post_edit.html', {'form':form})

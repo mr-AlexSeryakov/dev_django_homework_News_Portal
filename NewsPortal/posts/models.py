@@ -20,6 +20,9 @@ class Author(models.Model):
         self.rating = article_rating * 3 + comment_rating + post_comment_rating
         self.save()
 
+    def __str__(self):
+        return self.user.username.title()
+
 class Category(models.Model):
     sport = 'Sport'
     it_industry = 'IT'
@@ -37,6 +40,9 @@ class Category(models.Model):
     category_name = models.CharField(max_length=20,
                                      choices=CATEGORYES,
                                      unique= True)
+    
+    def __str__(self):
+        return self.category_name.title()
 
 class Post(models.Model):
     article = 'AR'
@@ -69,6 +75,9 @@ class Post(models.Model):
         """Возвращает начало статьи (предварительный просмотр) 
         длиной 124 символа и добавляет многоточие в конце"""
         return self.text[:124] + '...'
+    
+    def __str__(self):
+        return self.title.title()
 
 class PostCategory(models.Model):
     """Таблица многих ко многим"""
