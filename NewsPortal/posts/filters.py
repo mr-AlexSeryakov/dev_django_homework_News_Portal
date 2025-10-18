@@ -14,7 +14,7 @@ class ProductFilter(FilterSet):
     author_name = CharFilter(
         field_name='author__user__username',
         lookup_expr='icontains',
-        label = 'Имя автора'
+        label = 'Быстрый поиск по автору'
         )
     
     class Meta:

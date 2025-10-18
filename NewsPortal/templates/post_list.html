@@ -18,7 +18,10 @@ Posts
     {{ filterset.form.as_p }}
     <input type="submit" value="Найти">
 </form>
+<a href="{% url 'news_search' %}" class="btn btn-primary">Поиск новостей</a>
 <hr>
+
+<!--Отображение списка новостей-->
 {% if posts %}
     <table>
         <tr>

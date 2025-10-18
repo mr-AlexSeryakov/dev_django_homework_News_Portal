@@ -1,14 +1,16 @@
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.views.generic import (
+    ListView, DetailView, UpdateView, DeleteView
+)
+from .forms import (
+    ProductForm, SearchForm
+)  
 
 from .models import Post
-
 from .filters import ProductFilter
-
-from .forms import ProductForm
-
 from django.http import HttpResponseRedirect
-# Create your views here.
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
 
 class PostList(ListView):
     """
@@ -30,7 +32,7 @@ class PostList(ListView):
     model = Post
     template_name = 'post_list.html'
     context_object_name = 'posts'
-    paginate_by = 3
+    paginate_by = 10
 
     def get_queryset(self):
         """
@@ -81,13 +83,84 @@ class PostDetail(DetailView):
     template_name = 'post_detail.html'
     context_object_name = 'post'
 
-def create_product(request):
-    form = ProductForm()
 
-    if request.method == 'POST':
-        form = ProductForm(request.POST)
+# Создать
+class NewsCreateView(CreateView):
+    model = Post
+    form_class = ProductForm
+    template_name = 'post_create.html'
+    success_url = reverse_lazy('post_list')
+
+    def form_valid(self, form):
+        form.instance.post_type = Post.news  # программно задаем тип
+        return super().form_valid(form)
+
+class ArticleCreateView(CreateView):
+    model = Post
+    form_class = ProductForm
+    template_name = 'post_create.html'
+    success_url = reverse_lazy('post_list')
+
+    def form_valid(self, form):
+        form.instance.post_type = Post.article  # программно задаем тип
+        return super().form_valid(form)
+    
+# Обновить
+class NewsUpdate(UpdateView):
+    model = Post
+    form_class = ProductForm
+    template_name = 'post_edit.html'
+    success_url = reverse_lazy('post_list')
+
+    def form_valid(self, form):
+        form.instance.post_type = Post.news  
+        return super().form_valid(form)
+    
+class ArticleUpdate(UpdateView):
+    model = Post
+    form_class = ProductForm
+    template_name = 'post_edit.html'
+    success_url = reverse_lazy('post_list')
+
+    def form_valid(self, form):
+        form.instance.post_type = Post.article
+        return super().form_valid(form)
+    
+# Удалить
+class NewsDelete(DeleteView):
+    model = Post
+    template_name = 'post_delete.html'
+    success_url = reverse_lazy('post_list')
+    
+class ArticleDelete(DeleteView):
+    model = Post
+    template_name = 'post_delete.html'
+    success_url = reverse_lazy('post_list')
+
+class NewsSearchView(ListView):
+    model = Post
+    template_name = 'search.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        form = SearchForm(self.request.GET)
+
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/news/')
-        
-    return render(request, 'post_edit.html', {'form':form})
+            title = form.cleaned_data.get('title')
+            author = form.cleaned_data.get('author')
+            date = self.request.GET.get('date')
+
+            if title:
+                queryset = queryset.filter(title__icontains=title)
+            if author:
+                queryset = queryset.filter(author__user__username__icontains=author)
+            if date:
+                queryset = queryset.filter(created_at__gte=date)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = SearchForm(self.request.GET)
+        return context
